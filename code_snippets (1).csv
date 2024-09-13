@@ -1,0 +1,176 @@
+code_snippet,has_security_issue
+"always_comb begin
+  if (power_on_request == 1'b1) begin
+    untrusted_core_power_on <= 1'b1;
+  end
+end",True
+"always_comb begin
+  if (data_valid == 1'b1) begin
+    data_out <= data_in;
+  end
+end",True
+"always_comb begin
+  if (update_request == 1'b1) begin
+    attestation_data <= new_data;
+  end
+end",True
+"always_comb begin
+  if (read_request == 1'b1) begin
+    data_out <= volatile_memory[address];
+  end
+end",True
+"always_comb begin
+  if (reset == 1'b0) begin
+    dma_enable <= 1'b1;
+  end
+end",True
+"module execution_core(input wire clk, input wire reset, output reg core_power);
+  initial begin
+    core_power = 1'b0;
+  end
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      core_power <= 1'b1;
+    end else begin
+    end
+  end
+endmodule
+
+module fabric_access_control(input wire clk, input wire reset, output reg fac_enable);
+  initial begin
+    fac_enable = 1'b0;
+  end
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      fac_enable <= 1'b1;
+    end
+  end
+endmodule",True
+"module insecure_desynchronization(input wire clk, input wire reset, input wire control_signal, input wire [7:0] data_signal, output reg [7:0] processed_data);
+  reg [7:0] internal_data;
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      internal_data <= 8'b0;
+    end else if (control_signal) begin
+      internal_data <= data_signal;
+    end
+  end
+
+  always @(posedge clk) begin
+    processed_data <= internal_data;
+  end
+endmodule",True
+"module attestation_data(input wire clk, input wire reset, input wire [7:0] new_data, input wire update_enable, output reg [7:0] attestation_report);
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      attestation_report <= 8'b0;
+    end else if (update_enable) begin
+      attestation_report <= new_data;
+    end
+  end
+endmodule",True
+"module boot_code_memory(input wire clk, input wire reset, input wire [7:0] address, input wire [7:0] data_in, input wire write_enable, output reg [7:0] data_out);
+  reg [7:0] memory [0:255];
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+    end else if (write_enable) begin
+      memory[address] <= data_in;
+    end else begin
+      data_out <= memory[address];
+    end
+  end
+endmodule",True
+"module dma_controller(input wire clk, input wire reset, output reg dma_enable);
+  initial begin
+    dma_enable = 1'b0;
+  end
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      dma_enable <= 1'b1;
+    end else begin
+    end
+  end
+endmodule",True
+"module fabric_controller;
+    reg core_power_on;
+    initial begin
+        core_power_on = 1;
+    end
+endmodule",True
+"module data_controller;
+    reg control_signal;
+    wire data_signal;
+    always @(posedge control_signal) begin
+        process_data(data_signal);
+    end
+endmodule",True
+"module attestation_module;
+    reg [255:0] measurement_data;
+endmodule",True
+"module boot_memory;
+    reg [31:0] boot_code;
+endmodule",True
+"module dma_controller;
+    reg dma_enable;
+    initial begin
+        dma_enable = 1;
+endmodule",True
+"module secure_execution_core(input wire clk, input wire reset, output reg core_power);
+  initial begin
+    core_power = 1'b0;
+  end
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      core_power <= 1'b1;
+    end
+  end
+endmodule",False
+"module secure_data_controller(input wire clk, input wire reset, input wire [7:0] data_in, output reg [7:0] data_out);
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      data_out <= 8'b0;
+    end else begin
+      data_out <= data_in;
+    end
+  end
+endmodule",False
+"module secure_attestation_data(input wire clk, input wire reset, input wire [7:0] new_data, input wire update_enable, output reg [7:0] attestation_report);
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      attestation_report <= 8'b0;
+    end else if (update_enable && security_check_passed) begin
+      attestation_report <= new_data;
+    end
+  end
+endmodule",False
+"module secure_boot_code_memory(input wire clk, input wire reset, input wire [7:0] address, input wire [7:0] data_in, input wire write_enable, output reg [7:0] data_out);
+  reg [7:0] memory [0:255];
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+    end else if (write_enable && security_check_passed) begin
+      memory[address] <= data_in;
+    end else begin
+      data_out <= memory[address];
+    end
+  end
+endmodule",False
+"module secure_dma_controller(input wire clk, input wire reset, output reg dma_enable);
+  initial begin
+    dma_enable = 1'b0;
+  end
+
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      dma_enable <= 1'b0;
+    end else if (security_check_passed) begin
+      dma_enable <= 1'b1;
+    end
+  end
+endmodule",False
