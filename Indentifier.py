@@ -108,3 +108,35 @@ clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 print(classification_report(y_test, y_pred))
 
+def predict_security_issue(code_snippet):
+    #take in the input snippet 
+    inputs = tokenizer.encode_plus(
+        code_snippet,
+        add_special_tokens=True,
+        max_length=512, #what we used previously while training   
+        padding='max_length',
+        truncation=True,
+        return_tensors='pt'
+    )
+    
+    # Make a prediction using the trained model
+    with torch.no_grad():  
+        outputs = model(**inputs)
+        logits = outputs.logits
+        prediction = torch.argmax(logits, dim=1).item()  # get the predicted label
+    
+    #converts label to true or false 
+    predicted_label = label_encoder.inverse_transform([prediction])[0]
+    
+    #final result 
+    if predicted_label:
+        return "The code has a security issue."
+    else:
+        return "The code is safe."
+
+#enter desired code below 
+user_input_code = input("[enter code snippet here]")
+result = predict_security_issue(user_input_code)
+print(result)
+
+
